@@ -42,7 +42,7 @@ Global $rightmiddle[2] = [0,0];
 Global $rightbottom[2] = [0,0];
 Global $mappos[2] = [0,0];
 Global $movesec = 1
-
+Global $size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
 ;Globale Variablen - Ende
 
 While 1
@@ -120,15 +120,25 @@ EndFunc
 #Region ### START search ###
 Func search_box()
 	;Funktion zum Suchen einer Bonusbox return (x,y)
-
+	$boxsearch = PixelSearch(12 + $size[0], 5 + $size[1], 1020 + $size[0], 717 + $size[1], 0x7C72D7, 11)
+	Return $boxsearch
 EndFunc
 Func search_cargo()
 	;Funktion zum suchen einer Cagobox return (x,y)
-
+	$cargosearch = PixelSearch(12 + $size[0], 5 + $size[1], 1020 + $size[0], 717 + $size[1], 0xFCFD55, 15)
+	return $cargosearch
 EndFunc
 Func search_alien()
 	;Funktion zum suchen eines Aliens return (x,y)
-
+	$streuner = PixelSearch(12 + $size[0], 5 + $size[1], 1020 + $size[0], 717 + $size[1], 0xB00000, 5)
+	If IsArray($streuner) Then
+		$rechts = $streuner[1]   ;da er nach dem roten schriftzug sucht muss hier der mouseclick korriegiert werden (rechts x-achse)
+		$rechts2 = $rechts-30   ;da er nach dem roten schriftzug sucht muss hier der mouseclick korriegiert werden (rechts x-achse)
+		$links = $streuner[0]   ;da er nach dem roten schriftzug sucht muss hier der mouseclick korriegiert werden (links y-achse)
+		$links2 = $links+20   ;da er nach dem roten schriftzug sucht muss hier der mouseclick korriegiert werden (links y-achse)
+		Local $ally[2] = [$links2, $rechts2]
+		return $ally
+	EndIf
 EndFunc
 Func search_zone()
 	;Funktion zum checken ob man sich in der Strahlenzohne befindet return True|False
@@ -150,6 +160,7 @@ Func resetmove()
 			moverightmiddle()
 		Case 5
 			moverightbottom()
+
 		Case 6
 			movebottom()
 		Case 7
