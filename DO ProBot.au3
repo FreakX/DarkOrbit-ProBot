@@ -14,7 +14,7 @@
 #include <WindowsConstants.au3>
 Opt("GUIOnEventMode", 1)
 #Region ### START Koda GUI section ### Form=C:\Users\Daniel\Documents\Form1.kxf
-$Form1 = GUICreate("Form1", 388, 263, 286, 183)
+$Form1 = GUICreate("DarOrbit ProBot", 388, 263, 1030,0)
 GUISetOnEvent($GUI_EVENT_CLOSE, "Form1Close")
 $Starten = GUICtrlCreateButton("Starten", 32, 216, 332, 33, $WS_GROUP)
 GUICtrlSetOnEvent(-1, "StartenClick")
@@ -47,7 +47,22 @@ Global $mappos[2] = [0,0];
 Global $movesec = 1
 Global $loopcount = 0
 Global $zonehelp = 0
+WinActivate("www.DarkOrbit.com - Mozilla Firefox")
+Sleep(1000)
 Global $size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
+if IsArray($size) Then
+	WinSetOnTop("DarOrbit ProBot", "", 1)
+	WinSetOnTop("www.DarkOrbit.com - Mozilla Firefox","",1)
+	Sleep(1000)
+	MouseMove($size[0] + 100, $size[1] + 10)
+	MouseDown("left")
+	MouseMove(100, 10)
+	MouseUp("left")
+	WinActivate("DarOrbit ProBot")
+Else
+	MsgBox(1, "Kein DarkOrbit Fenster geöffnet", "DarkOrbit ProBot hat festgestellt, dass kein DarkOrbit Fenster geöffnet ist")
+	_exit()
+EndIf
 ;Globale Variablen - Ende
 
 While 1
@@ -251,6 +266,7 @@ Func _pause()
 	EndSwitch
 EndFunc
 Func _exit()
+	WinSetOnTop("www.DarkOrbit.com - Mozilla Firefox","",0)
 	Exit 0
 EndFunc
 #EndRegion ### END main funcs ###
@@ -279,6 +295,7 @@ Func _main()
 			Select
 				Case IsArray($box)
 					react_stop()
+					Sleep(500)
 					react_box()
 				Case IsArray($cargo)
 					react_stop()
@@ -300,10 +317,3 @@ EndFunc
 
 
 
-
-Sleep(5000)
-Global $size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
-MouseMove($size[0] + 100, $size[1] + 10)
-MouseDown("left")
-MouseMove(100, 10)
-MouseUp("left")
