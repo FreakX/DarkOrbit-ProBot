@@ -45,6 +45,7 @@ Global $clicker1[2] = [512, 337]
 Global $clicker2[2] = [512, 506]
 Global $mappos[2] = [0,0];
 Global $movesec = 1
+Global $loopcount = 0
 Global $zonehelp = 0
 Global $size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
 ;Globale Variablen - Ende
@@ -137,7 +138,14 @@ Func react_alien()
 		Send("{SPACE}")
 		Sleep(5000)
 		Send("{LCTRL}")
-
+		$cargo = search_cargo()
+		While IsArray($cargo)
+		If IsArray($cargo) Then
+			click($cargo[0],$cargo[1])
+			Sleep(2000)
+		EndIf
+		$cargo = search_cargo()
+	WEnd
 	EndIf
 EndFunc
 Func react_zone()
@@ -165,7 +173,9 @@ Func react_zone()
 EndFunc
 Func react_other_sec()
 	;Funktion zum Schalten in eine Neue Richtung
-
+	$dim = Ceiling(Random(1,8))
+	$movesec = $dim
+	resetmove()
 EndFunc
 #EndRegion ### END react ###
 #Region ### START search ###
@@ -258,6 +268,12 @@ Func _main()
 				$cargo = search_cargo();
 				$alien = search_alien();
 				$zone = search_zone()
+				if $loopcount >= 30 Then
+					$loopcount = 0
+					react_other_sec()
+				Else
+					$loopcount = $loopcount + 1
+				EndIf
 			Until IsArray($box) Or IsArray($cargo) Or IsArray($alien) Or $zone == True
 
 			Select
@@ -277,6 +293,7 @@ Func _main()
 			EndSelect
 			react_other_sec()
 			resetmove()
+
 		EndIf
 	WEnd
 EndFunc
