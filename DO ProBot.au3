@@ -30,18 +30,22 @@ $Checkbox8 = GUICtrlCreateCheckbox("5 Feinden", 48, 184, 121, 17)
 GUISetState(@SW_SHOW)
 #EndRegion ### END Koda GUI section ###
 ;Globale Variablen - Definition
+HotKeySet("!e", "_exit")
 Global $mousespeed = 2;
 Global $pause = False;
-Global $lefttop[2] = [0,0];
-Global $leftmiddle[2] = [0,0];
-Global $leftbottom[2] = [0,0];
-Global $top[2] = [0,0];
-Global $bottom[2] = [0,0];
-Global $righttop[2] = [0,0];
-Global $rightmiddle[2] = [0,0];
-Global $rightbottom[2] = [0,0];
+Global $lefttop[2] = [263, 243];
+Global $leftmiddle[2] = [331, 418];
+Global $leftbottom[2] = [293, 612];
+Global $top[2] = [519, 247];
+Global $bottom[2] = [519, 617];
+Global $righttop[2] = [729, 251];
+Global $rightmiddle[2] = [723, 424];
+Global $rightbottom[2] = [757, 592];
+Global $clicker1[2] = [512, 337]
+Global $clicker2[2] = [512, 506]
 Global $mappos[2] = [0,0];
 Global $movesec = 1
+Global $zonehelp = 0
 Global $size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
 ;Globale Variablen - Ende
 
@@ -94,23 +98,70 @@ EndFunc
 #Region ### START react ###
 Func react_stop()
 	;Function zum Stoppen des Schiffes
+	click($clicker1[0],$clicker1[1])
+	Sleep(400)
+	click($clicker2[0],$clicker2[1])
+	Sleep(400)
 
 EndFunc
 Func react_box()
 	;Funktion zum Reagieren auf eine Box
-
+	$box = search_box()
+	While IsArray($box)
+		If IsArray($box) Then
+			click($box[0],$box[1])
+			Sleep(2000)
+		EndIf
+		$box = search_box()
+	WEnd
 EndFunc
 Func react_cargo()
 	;Funktion zum reagieren auf eine Cargobox
-
+	$cargo = search_cargo()
+	While IsArray($cargo)
+		If IsArray($cargo) Then
+			click($cargo[0],$cargo[1])
+			Sleep(2000)
+		EndIf
+		$cargo = search_cargo()
+	WEnd
 EndFunc
 Func react_alien()
 	;Funktion zum reagieren auf ein Alien ( Hauptsächlich Streuner )
+	;$alien = search_alien()
+	$alien = search_alien()
+	if IsArray($alien) Then
+		click($alien[0],$alien[1])
+		Sleep(200)
+		Send("{LCTRL}")
+		Send("{SPACE}")
+		Sleep(5000)
+		Send("{LCTRL}")
 
+	EndIf
 EndFunc
 Func react_zone()
 	;Funktion zum reagieren auf einen Flug in die Strahlenzone
-
+	MouseUp("left")
+	Switch $movesec
+		Case 1
+			$movesec = 5
+		Case 2
+			$movesec = 6
+		Case 3
+			$movesec = 7
+		Case 4
+			$movesec = 8
+		Case 5
+			$movesec = 1
+		Case 6
+			$movesec = 2
+		Case 7
+			$movesec = 3
+		Case 8
+			$movesec = 4
+	EndSwitch
+	resetmove()
 EndFunc
 Func react_other_sec()
 	;Funktion zum Schalten in eine Neue Richtung
@@ -120,16 +171,19 @@ EndFunc
 #Region ### START search ###
 Func search_box()
 	;Funktion zum Suchen einer Bonusbox return (x,y)
+	$size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
 	$boxsearch = PixelSearch(12 + $size[0], 5 + $size[1], 1020 + $size[0], 717 + $size[1], 0x7C72D7, 11)
 	Return $boxsearch
 EndFunc
 Func search_cargo()
 	;Funktion zum suchen einer Cagobox return (x,y)
+	$size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
 	$cargosearch = PixelSearch(12 + $size[0], 5 + $size[1], 1020 + $size[0], 717 + $size[1], 0xFCFD55, 15)
 	return $cargosearch
 EndFunc
 Func search_alien()
 	;Funktion zum suchen eines Aliens return (x,y)
+	$size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
 	$streuner = PixelSearch(12 + $size[0], 5 + $size[1], 1020 + $size[0], 717 + $size[1], 0xB00000, 5)
 	If IsArray($streuner) Then
 		$rechts = $streuner[1]   ;da er nach dem roten schriftzug sucht muss hier der mouseclick korriegiert werden (rechts x-achse)
@@ -142,11 +196,20 @@ Func search_alien()
 EndFunc
 Func search_zone()
 	;Funktion zum checken ob man sich in der Strahlenzohne befindet return True|False
-
+	$zonesearch = PixelSearch(433, 224, 608, 340, 0x5C0000, 10);
+	if IsArray($zonesearch) Then
+		return True
+	Else
+		return False
+	EndIf
+	$zonesearch = False
 EndFunc
 #EndRegion ### END search ###
 
 #Region ### START main funcs ###
+Func click($x,$y)
+	MouseClick("left", $x , $y, 1, 0)
+EndFunc
 Func resetmove()
 	MouseUp("left")
 	Switch $movesec
@@ -160,7 +223,6 @@ Func resetmove()
 			moverightmiddle()
 		Case 5
 			moverightbottom()
-
 		Case 6
 			movebottom()
 		Case 7
@@ -170,6 +232,7 @@ Func resetmove()
 	EndSwitch
 EndFunc
 Func _pause()
+	MouseUp("left")
 	Switch $pause
 		Case False
 			$pause = True
@@ -196,19 +259,34 @@ Func _main()
 				$alien = search_alien();
 				$zone = search_zone()
 			Until IsArray($box) Or IsArray($cargo) Or IsArray($alien) Or $zone == True
-			react_stop()
+
 			Select
 				Case IsArray($box)
+					react_stop()
 					react_box()
 				Case IsArray($cargo)
+					react_stop()
 					react_cargo()
 				Case IsArray($alien)
+					react_stop()
 					react_alien()
 				Case $zone == True
 					react_zone()
+					Sleep(4000)
+					$zone = False
 			EndSelect
 			react_other_sec()
+			resetmove()
 		EndIf
 	WEnd
 EndFunc
 
+
+
+
+Sleep(5000)
+Global $size = WinGetPos("www.DarkOrbit.com - Mozilla Firefox")
+MouseMove($size[0] + 100, $size[1] + 10)
+MouseDown("left")
+MouseMove(100, 10)
+MouseUp("left")
